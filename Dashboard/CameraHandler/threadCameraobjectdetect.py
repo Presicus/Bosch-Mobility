@@ -7,9 +7,9 @@ class Threadcamera_object_detect(ThreadWithStop):
         super(Threadcamera_object_detect, self).__init__()
         self.data_queue=data_queue
         self.data_queue_send=data_queue_send
-        self.model = YOLO('best.pt')
+        self.model = YOLO('vip.pt')
         self.focal_length=211.75
-        self.real_height=6
+        self.real_height=4
         self.speed=10
 
     def run(self):
