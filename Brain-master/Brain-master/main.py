@@ -73,7 +73,7 @@ allProcesses.append(processGateway)
 
 # Initializing camera
 if Camera:
-    processCamera = processCamera(queueList,logging)
+    processCamera = processCamera(queueList, logging)
     allProcesses.append(processCamera)
 
 # Initializing interface
@@ -106,8 +106,6 @@ for process in allProcesses:
     process.daemon = True
     process.start()
 
-
-  
 # ===================================== STAYING ALIVE ====================================
 blocker = Event()
 try:

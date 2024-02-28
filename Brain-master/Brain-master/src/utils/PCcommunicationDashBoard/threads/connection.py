@@ -120,10 +120,11 @@ class SingleConnection(protocol.Protocol):
                         "msgValue": dataJSON["value"],
                     }
                 )
-            # print("Received from", self.factory.connectiondata, " : ", data.decode())
+            print("Received from", self.factory.connectiondata, " : ", data.decode())
 
     # ===================================== SEND DATA ==========================================
     def send_data(self, messageValue, messageType, messageOwner, messageId):
+        print(messageType, messageOwner, messageId)
         """This function will send firstly an encoded message as an int represented in one byte after that it will send the lenght of the message and the message."""
         self.transport.write(
             self.factory.encoder[(messageType, messageOwner, messageId)].to_bytes(
@@ -142,6 +143,7 @@ from src.utils.messages.allMessages import (
     SignalRunning,
     Location,
     Signal,
+    ImuData,
 )
 
 
@@ -179,6 +181,11 @@ class FactoryDealer(protocol.Factory):
                 mainCamera.Owner.value,
                 mainCamera.msgID.value,
             ): 5,
+            (
+                ImuData.msgType.value,
+                ImuData.Owner.value,
+                ImuData.msgID.value,
+            ): 6,
         }
 
     def send_data_to_client(self, messageValue, messageType, messageOwner, messageId):

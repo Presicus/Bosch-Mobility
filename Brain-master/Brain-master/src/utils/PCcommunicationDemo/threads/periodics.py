@@ -58,11 +58,14 @@ class PeriodicTask(task.LoopingCall):
     def periodicCheck(self):
         """This function will check every interval of time if there is something to be send. If it is we will create the message and we will send it."""
         if self.pipe.poll():
+            
             msg = self.pipe.recv()
+            
             messageValue = msg["value"]
             messageType = msg["Type"]
             messageOwner = msg["Owner"]
             messageId = msg["id"]
+            print(messageOwner,messageId)
             if not messageType == "base64":
                 messageValue2 = json.dumps(messageValue)
                 self.factory.send_data_to_client(

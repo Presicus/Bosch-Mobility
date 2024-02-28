@@ -163,8 +163,8 @@ from src.utils.messages.allMessages import (
     SignalRunning,
     Recording,
     Location,
+    ImuData,
 )
-
 
 # The server itself. Creates a new Protocol for each new connection and has the info for all of them.
 class FactoryDealer(protocol.Factory):
@@ -211,6 +211,11 @@ class FactoryDealer(protocol.Factory):
                 Location.Owner.value,
                 Location.msgID.value,
             ): 8,
+            (
+                ImuData.msgType.value,
+                ImuData.Owner.value,
+                ImuData.msgID.value,
+            ): 9,
         }
 
     def send_data_to_client(self, messageValue, messageType, messageOwner, messageId):

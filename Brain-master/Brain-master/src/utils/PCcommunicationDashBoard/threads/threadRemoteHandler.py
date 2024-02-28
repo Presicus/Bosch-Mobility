@@ -34,6 +34,7 @@ from src.utils.messages.allMessages import (
     Location,
     mainCamera,
     Signal,
+    ImuData,
 )
 from twisted.internet import reactor
 
@@ -108,11 +109,19 @@ class threadRemoteHandler(ThreadWithStop):
                 "To": {"receiver": "threadRemoteHandler", "pipe": pipeSend},
             }
         )
+        self.queues["Config"].put(
+            {
+                "Subscribe/Unsubscribe": "subscribe",
+                "Owner": ImuData.Owner.value,
+                "msgID": ImuData.msgID.value,
+                "To": {"receiver": "threadRemoteHandler", "pipe": pipeSend},
+            }
+        )
 
     # ===================================== RUN ======================================
     def run(self):
         self.task.start()
-        print("before run")
+        print("before run")                
         self.reactor.run(installSignalHandlers=False)
         print("after run")
 

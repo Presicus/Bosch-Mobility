@@ -61,7 +61,9 @@ class threadRead(ThreadWithStop):
             read_chr = self.serialCon.read()
             try:
                 read_chr = read_chr.decode("ascii")
-                if read_chr == "@":
+                if self.isResponse:
+                    self.buff += read_chr
+                if read_chr == "@":    
                     self.isResponse = True
                     if len(self.buff) != 0:
                         self.sendqueue(self.buff)
@@ -71,8 +73,8 @@ class threadRead(ThreadWithStop):
                     if len(self.buff) != 0:
                         self.sendqueue(self.buff)
                     self.buff = ""
-                if self.isResponse:
-                    self.buff += read_chr
+
+                    
             except UnicodeDecodeError:
                 pass
 
@@ -93,13 +95,13 @@ class threadRead(ThreadWithStop):
         """This function select which type of message we receive from NUCLEO and send the data further."""
         if buff[0] == 1:
             print(buff[2:-2])
-        elif buff[0] == 2:
+        if buff[0] == 2:
             print(buff[2:-2])
-        elif buff[0] == 3:
+        if buff[0] == 3:
             print(buff[2:-2])
-        elif buff[0] == 4:
+        if buff[0] == 4:
             print(buff[2:-2])
-        elif buff[0] == 5:
+        if buff[0] == 5:
             self.queuesList[BatteryLvl.Queue].put(
                 {
                     "Owner": BatteryLvl.Owner,
@@ -108,7 +110,7 @@ class threadRead(ThreadWithStop):
                     "msgValue": int(buff[2:-3]),
                 }
             )
-        elif buff[0] == 6:
+        if buff[0] == 6:
             self.queuesList[InstantConsumption.Queue].put(
                 {
                     "Owner": InstantConsumption.Owner,
@@ -117,22 +119,16 @@ class threadRead(ThreadWithStop):
                     "msgValue": int(buff[2:-3]),
                 }
             )
-        elif buff[0] == 7:
+        if int(buff[0]) == 7:
             buff = buff[2:-2]
             splitedBuffer = buff.split(";")
-            data = {
-                "roll": splitedBuffer[0],
-                "pitch": splitedBuffer[1],
-                "yaw": splitedBuffer[2],
-                "accelx": splitedBuffer[3],
-                "accely": splitedBuffer[4],
-                "accelz": splitedBuffer[5],
-            }
-            self.queuesList[ImuData.Queue].put(
+            data=float(splitedBuffer[2])
+            self.queuesList[ImuData.Queue.value].put(
                 {
-                    "Owner": ImuData.Owner,
-                    "msgID": ImuData.msgID,
-                    "msgType": ImuData.msgType,
+                    "Owner": ImuData.Owner.value,
+                    "msgID": ImuData.msgID.value,
+                    "msgType": ImuData.msgType.value,
                     "msgValue": data,
                 }
+            
             )

@@ -28,7 +28,7 @@
 import cv2
 import threading
 import base64
-
+import picamera2
 import time
 
 from multiprocessing import Pipe
@@ -132,18 +132,32 @@ class threadCamera(ThreadWithStop):
             try:
                 if self.pipeRecvRecord.poll():
                     msg = self.pipeRecvRecord.recv()
-                    
+                    self.recording = msg["value"]
+                    if msg["value"] == False:
+                        self.video_writer.release()
+                    else:
+                        fourcc = cv2.VideoWriter_fourcc(
+                            *"MJPG"
+                        )  # You can choose different codecs, e.g., 'MJPG', 'XVID', 'H264', etc.
+                        self.video_writer = cv2.VideoWriter(
+                            "output_video" + str(time.time()) + ".avi",
+                            fourcc,
+                            self.frame_rate,
+                            (2048, 1080),
+                        )
             except Exception as e:
                 print(e)
             if self.debugger == True:
                 self.logger.warning("getting image")
-            request = cv2.imread('img.jpg')
+            request = self.camera.capture_array("main")
             if var:
                 if self.recording == True:
                     cv2_image = cv2.cvtColor(request, cv2.COLOR_RGB2BGR)
                     self.video_writer.write(cv2_image)
-                # Will capture an array that can be used by OpenCV library
-                request2 = cv2.imread('img.jpg')
+                request2 = self.camera.capture_array(
+                    "lores"
+                )  # Will capture an array that can be used by OpenCV library
+                request2 = request2[:360, :]
                 _, encoded_img = cv2.imencode(".jpg", request2)
                 _, encoded_big_img = cv2.imencode(".jpg", request)
                 image_data_encoded = base64.b64encode(encoded_img).decode("utf-8")
@@ -171,4 +185,15 @@ class threadCamera(ThreadWithStop):
         super(threadCamera, self).start()
 
     # ================================ INIT CAMERA ========================================
-    
+    def _init_camera(self):
+        """This function will initialize the camera object. It will make this camera object have two chanels "lore" and "main"."""
+        self.camera = picamera2.Picamera2()
+        config = self.camera.create_preview_configuration(
+            buffer_count=1,
+            queue=False,
+            main={"format": "XBGR8888", "size": (2048, 1080)},
+            lores={"size": (480, 360)},
+            encode="lores",
+        )
+        self.camera.configure(config)
+        self.camera.start()

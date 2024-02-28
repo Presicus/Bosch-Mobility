@@ -153,7 +153,7 @@ class ImuData(Enum):
     Queue = "General"
     Owner = "threadReadSerial"
     msgID = 2
-    msgType = "String"
+    msgType = "float"
 
 
 class InstantConsumption(Enum):
